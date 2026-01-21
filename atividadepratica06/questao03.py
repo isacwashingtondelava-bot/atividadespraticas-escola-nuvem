@@ -1,23 +1,31 @@
 import requests
 
-cep = input("Digite o CEP (somente números): ")
+def consultar_cep(cep):
+    url = f"https://viacep.com.br/ws/{cep}/json/"
+    try:
+        resposta = requests.get(url)
+        resposta.raise_for_status()
+        dados = resposta.json()
 
-url = f"https://viacep.com.br/ws/{cep}/json/"
+        if 'erro' in dados:
+            return "CEP inválido."
 
-try:
-    response = requests.get(url)
-    response.raise_for_status()
+        logradouro = dados['logradouro']
+        bairro = dados['bairro']
+        localidade = dados['localidade']
+        uf = dados['uf']
 
-    dados = response.json()
+        return (
+            f"Logradouro: {logradouro}\n"
+            f"Bairro: {bairro}\n"
+            f"Localidade: {localidade}\n"
+            f"UF: {uf}"
+        )
 
-    if "erro" in dados:
-        print("CEP não encontrado.")
-    else:
-        print("Endereço encontrado:")
-        print(f"Logradouro: {dados['logradouro']}")
-        print(f"Bairro: {dados['bairro']}")
-        print(f"Cidade: {dados['localidade']}")
-        print(f"Estado: {dados['uf']}")
+    except requests.RequestException as e:
+        return f"Erro ao consultar CEP: {e}"
 
-except requests.exceptions.RequestException:
-    print("Erro ao consultar o CEP.")
+
+cep = input("Digite o CEP: ")
+resultado = consultar_cep(cep)
+print(resultado)
